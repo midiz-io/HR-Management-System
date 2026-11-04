@@ -1,0 +1,384 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+model User {
+  id             String          @id @db.Uuid
+  email          String          @unique
+  firstName      String?
+  lastName       String?
+  role           UserRole        @default(EMPLOYEE)
+  department     String?
+  position       String?
+  joinDate       DateTime?
+  profileImage   String?
+  sequentialId   Int             @default(autoincrement())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  attendances    Attendance[]
+  locations      Location[]      @relation("LocationAdmins")
+  leaveRequests  LeaveRequest[]
+  leaveBalances  LeaveBalance[]
+  reviewedLeaves LeaveRequest[]  @relation("LeaveReviewer")
+  workShifts     WorkShift[]     @relation("EmployeeWorkShifts")
+  rosters        Roster[]        @relation("EmployeeRosters")
+  notifications  NotificationSubscription[]
+  assignedTasks  Task[]          @relation("AssignedTasks")
+  createdTasks   Task[]          @relation("CreatedTasks")
+  taskMessages   TaskMessage[]
+  locationId     String?
+  location       Location?       @relation("EmployeeLocation", fields: [locationId], references: [id])
+  lateAttendanceTracker LateAttendanceTracker?
+  foodOrders     FoodOrder[]     @relation("EmployeeFoodOrders")
+  approvedFoodOrders FoodOrder[] @relation("FoodOrderApprover")
+  salaryConfig   SalaryConfig?
+  payrolls       Payroll[]
+
+
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+  SUPER_ADMIN
+
+
+}
+
+model Location {
+  id          String       @id @default(uuid())
+  name        String
+  address     String
+  latitude    Float
+  longitude   Float
+  radius      Float        @default(50) // Default radius in meters
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attendances Attendance[]
+  admins      User[]       @relation("LocationAdmins")
+  employees   User[]       @relation("EmployeeLocation")
+
+
+}
+
+model Attendance {
+  id              String    @id @default(uuid())
+  userId          String    @db.Uuid
+  user            User      @relation(fields: [userId], references: [id])
+  locationId      String
+  location        Location  @relation(fields: [locationId], references: [id])
+  checkInTime     DateTime
+  checkOutTime    DateTime?
+  checkInLatitude Float
+  checkInLongitude Float
+  checkOutLatitude Float?
+  checkOutLongitude Float?
+  status          AttendanceStatus @default(PRESENT)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  OVERTIME
+
+
+}
+
+model LeaveType {
+  id                String         @id @default(uuid())
+  name              String
+  description       String?
+  color             String?        // For UI display
+  defaultAllocation Float?         // Annual quota in days (null = unlimited/as-approved)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  leaveRequests     LeaveRequest[]
+  leaveBalances     LeaveBalance[]
+
+
+}
+
+model LeaveRequest {
+  id               String           @id @default(uuid())
+  userId           String           @db.Uuid
+  user             User             @relation(fields: [userId], references: [id])
+  leaveTypeId      String
+  leaveType        LeaveType        @relation(fields: [leaveTypeId], references: [id])
+  startDate        DateTime
+  endDate          DateTime
+  totalDays        Float            // Can be fractional for half-days
+  reason           String           @db.Text
+  status           LeaveStatus      @default(PENDING)
+  reviewerId       String?          @db.Uuid
+  reviewer         User?            @relation("LeaveReviewer", fields: [reviewerId], references: [id])
+  reviewedAt       DateTime?
+  rejectionReason  String?          @db.Text
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  documents        LeaveDocument[]
+
+
+}
+
+model LeaveBalance {
+  id           String    @id @default(uuid())
+  userId       String    @db.Uuid
+  user         User      @relation(fields: [userId], references: [id])
+  leaveTypeId  String
+  leaveType    LeaveType @relation(fields: [leaveTypeId], references: [id])
+  year         Int
+  totalDays    Float     // Annual quota
+  usedDays     Float     @default(0)
+  pendingDays  Float     @default(0) // Days in pending requests
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([userId, leaveTypeId, year])
+
+}
+
+model LeaveDocument {
+  id             String       @id @default(uuid())
+  leaveRequestId String
+  leaveRequest   LeaveRequest @relation(fields: [leaveRequestId], references: [id], onDelete: Cascade)
+  fileName       String
+  fileUrl        String
+  fileType       String
+  fileSize       Int
+  uploadedAt     DateTime     @default(now())
+
+
+}
+
+enum LeaveStatus {
+  PENDING
+  VERIFIED
+  APPROVED
+  REJECTED
+  CANCELLED
+
+
+}
+
+model WorkShift {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  startTime   String    // Store as HH:MM format
+  endTime     String    // Store as HH:MM format
+  days        String[]  // Array of days of the week (e.g., ["Monday", "Tuesday"])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  employees   User[]    @relation("EmployeeWorkShifts")
+  rosters     Roster[]
+
+
+}
+
+model Roster {
+  id          String    @id @default(uuid())
+  userId      String    @db.Uuid
+  user        User      @relation("EmployeeRosters", fields: [userId], references: [id])
+  workShiftId String
+  workShift   WorkShift @relation(fields: [workShiftId], references: [id])
+  startDate   DateTime
+  endDate     DateTime?
+  notes       String?
+  isDaily     Boolean   @default(false)
+  customDays  String[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+
+}
+
+model NotificationSubscription {
+  id           String   @id @default(uuid())
+  userId       String   @db.Uuid
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint     String   @unique
+  p256dh       String
+  auth         String
+  expirationTime DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+
+}
+
+model Notification {
+  id           String   @id @default(uuid())
+  title        String
+  body         String
+  icon         String?
+  url          String?
+  tag          String?
+  userId       String?  @db.Uuid
+  read         Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+
+}
+
+model DailyReport {
+  id           String   @id @default(uuid())
+  date         DateTime
+  reportType   String   // "ATTENDANCE", "LEAVE", etc.
+  reportData   Json
+  generatedAt  DateTime @default(now())
+  sentToUsers  Boolean  @default(false)
+
+
+}
+
+model Task {
+  id              String        @id @default(uuid())
+  title           String
+  description     String        @db.Text
+  assignedToId    String        @db.Uuid
+  assignedTo      User          @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  assignedById    String        @db.Uuid
+  assignedBy      User          @relation("CreatedTasks", fields: [assignedById], references: [id])
+  startDate       DateTime
+  deadline        DateTime
+  duration        Int           // Duration in minutes
+  status          TaskStatus    @default(ASSIGNED)
+  proofImageUrl   String?
+  reviewedAt      DateTime?
+  rejectionReason String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  taskMessages    TaskMessage[]
+
+
+}
+
+enum TaskStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  APPROVED
+  REJECTED
+
+
+}
+
+model TaskMessage {
+  id        String   @id @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+
+}
+
+model LateAttendanceTracker {
+  id                        String   @id @default(uuid())
+  userId                    String   @unique @db.Uuid
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consecutiveLateCount      Int      @default(0)
+  lastLateDate              DateTime?
+  lastWarningDate           DateTime?
+  lastDeductionDate         DateTime?
+  warningNotificationSent   Boolean  @default(false)
+  deductionNotificationSent Boolean  @default(false)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+
+}
+
+model FoodOrder {
+  id           String          @id @default(uuid())
+  userId       String          @db.Uuid
+  user         User            @relation("EmployeeFoodOrders", fields: [userId], references: [id])
+  date         DateTime        // The day the food is for
+  mealType     String          // e.g., "Breakfast", "Lunch", "Dinner", "Breakfast + Lunch", etc.
+  status       FoodOrderStatus @default(PENDING)
+  approvedById String?         @db.Uuid
+  approvedBy   User?           @relation("FoodOrderApprover", fields: [approvedById], references: [id])
+  approvedAt   DateTime?
+  notes        String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@unique([userId, date, mealType]) // Prevent duplicate orders for same meal on same day
+
+}
+
+enum FoodOrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+
+
+}
+
+model SalaryConfig {
+  id            String   @id @default(uuid())
+  userId        String   @unique @db.Uuid
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  basicSalary   Float
+  allowances    Float    @default(0)
+  deductions    Float    @default(0)
+  epfEmployee   Float    @default(8) // Percentage
+  epfEmployer   Float    @default(12) // Percentage
+  etfEmployer   Float    @default(3) // Percentage
+  bankName      String?
+  accountNumber String?
+  branchName    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+
+}
+
+model Payroll {
+  id               String   @id @default(uuid())
+  userId           String   @db.Uuid
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month            Int
+  year             Int
+  basicSalary      Float
+  allowances       Float
+  deductions       Float
+  attendanceBonus  Float    @default(0)
+  lateDeductions   Float    @default(0)
+  epfAmount        Float    // Employee share
+  etfAmount        Float    // Employer share
+  netSalary        Float
+  status           PayrollStatus @default(PENDING)
+  paidAt           DateTime?
+  paysheetUrl      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, month, year])
+
+}
+
+enum PayrollStatus {
+  PENDING
+  PROCESSED
+  PAID
+
+
+}
+

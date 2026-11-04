@@ -1,0 +1,10 @@
+model TrashRecord {
+  id          String   @id @default(uuid())
+  tableName   String
+  recordId    String
+  recordData  Json
+  deletedAt   DateTime @default(now())
+
+  @@index([tableName])
+  @@index([deletedAt])
+}

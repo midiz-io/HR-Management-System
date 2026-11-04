@@ -1,0 +1,21 @@
+{
+  "name": "AttendX Gate Scanner",
+  "short_name": "Gate Scanner",
+  "start_url": "/gate-scanner",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "description": "Standalone QR scanner terminal for Gate Security Officers",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

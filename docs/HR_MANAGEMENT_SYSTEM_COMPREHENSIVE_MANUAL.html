@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AttendX Enterprise HRMS - Comprehensive System Manual</title>
+<style>
+  @page {
+    size: A4;
+    margin: 16mm 16mm 16mm 16mm;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .page-break {
+      page-break-after: always;
+      break-after: page;
+    }
+    .no-break {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    background: #ffffff;
+    line-height: 1.55;
+    font-size: 10pt;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Fixed Watermark on every printed page */
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-32deg);
+    font-size: 34pt;
+    font-weight: 900;
+    color: rgba(30, 41, 59, 0.055);
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Header and Footer for Pages */
+  .running-header {
+    position: fixed;
+    top: -10mm;
+    left: 0;
+    right: 0;
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .running-footer {
+    position: fixed;
+    bottom: -10mm;
+    left: 0;
+    right: 0;
+    font-size: 7.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4 {
+    color: #0f172a;
+    font-weight: 700;
+    margin-top: 0;
+    line-height: 1.25;
+  }
+
+  h1 { font-size: 20pt; margin-bottom: 8px; }
+  h2 { 
+    font-size: 13pt; 
+    border-bottom: 2px solid #0284c7; 
+    padding-bottom: 4px; 
+    margin-top: 18px; 
+    margin-bottom: 10px; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  h3 { font-size: 11pt; margin-top: 14px; margin-bottom: 6px; color: #0369a1; }
+  h4 { font-size: 10pt; margin-top: 10px; margin-bottom: 4px; }
+
+  p {
+    margin: 0 0 8px 0;
+    text-align: justify;
+  }
+
+  /* Cover Page */
+  .cover-page {
+    min-height: 98vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e293b 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+    page-break-after: always;
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: rgba(2, 132, 199, 0.25);
+    border: 1px solid #38bdf8;
+    color: #7dd3fc;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .cover-title {
+    font-size: 26pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin: 15px 0 10px 0;
+    color: #ffffff;
+  }
+
+  .cover-subtitle {
+    font-size: 12pt;
+    color: #94a3b8;
+    line-height: 1.4;
+    max-width: 600px;
+  }
+
+  .watermark-banner {
+    background: linear-gradient(90deg, #0284c7 0%, #2563eb 100%);
+    color: #ffffff;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12pt;
+    letter-spacing: 1.5px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+    margin: 25px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .cover-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .cover-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .cover-card-title {
+    font-size: 8pt;
+    color: #38bdf8;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .cover-card-val {
+    font-size: 9.5pt;
+    color: #f1f5f9;
+    font-weight: 600;
+  }
+
+  .cover-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 15px;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Content Cards & Grids */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+
+  .card-highlight {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 4px solid #0284c7;
+  }
+
+  .card-warning {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+  }
+
+  .card-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #10b981;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-bottom: 12px;
+  }
+
+  th {
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+    padding: 6px 8px;
+    border: 1px solid #0f172a;
+  }
+
+  td {
+    padding: 5px 8px;
+    border: 1px solid #cbd5e1;
+  }
+
+  tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  /* Badges & Tags */
+  .badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 7.5pt;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+
+  .badge-blue { background: #e0f2fe; color: #0369a1; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-purple { background: #f3e8ff; color: #7e22ce; }
+  .badge-amber { background: #fef3c7; color: #b45309; }
+
+  /* Code block */
+  pre, code {
+    font-family: "Consolas", "Courier New", monospace;
+  }
+
+  code {
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 8pt;
+    color: #0f172a;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+
+  /* List Styling */
+  ul {
+    margin: 0 0 10px 0;
+    padding-left: 18px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  .watermark-subtle {
+    font-size: 8pt;
+    font-weight: 700;
+    color: #0284c7;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- FIXED WATERMARK ON EVERY PRINTED PAGE -->
+  <div class="watermark">DEVELOPED BY :- KALPA WISHVAJITH</div>
+
+  <!-- FIXED HEADER ON EVERY PAGE (EXCEPT COVER) -->
+  <div class="running-header">
+    <span>ATTENDX ENTERPRISE HR & WORKFORCE MANAGEMENT SYSTEM</span>
+    <span>DEVELOPED BY :- KALPA WISHVAJITH</span>
+  </div>
+
+  <!-- FIXED FOOTER ON EVERY PAGE (EXCEPT COVER) -->
+  <div class="running-footer">
+    <span>CONFIDENTIAL & PROPRIETARY &copy; ATTENDX HRMS</span>
+    <span>DEVELOPED BY :- KALPA WISHVAJITH</span>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- COVER PAGE -->
+  <!-- ========================================== -->
+  <div class="cover-page">
+    <div>
+      <span class="cover-badge">Enterprise Edition v2.4.0</span>
+      <div class="cover-title">ATTENDX ENTERPRISE<br/>HR & WORKFORCE MANAGEMENT SYSTEM</div>
+      <div class="cover-subtitle">
+        Comprehensive Technical Architecture, Geofencing Engine, Multi-Branch Roster, Leave Management, Biometric/QR Gate Kiosk, and Automated Payroll System Manual
+      </div>
+
+      <div class="watermark-banner">
+        DEVELOPED BY :- KALPA WISHVAJITH
+      </div>
+
+      <div class="cover-grid">
+        <div class="cover-card">
+          <div class="cover-card-title">Core Web Framework</div>
+          <div class="cover-card-val">Next.js 14 (Pages/API) + TypeScript</div>
+        </div>
+        <div class="cover-card">
+          <div class="cover-card-title">Database & ORM</div>
+          <div class="cover-card-val">Prisma ORM + PostgreSQL / Supabase</div>
+        </div>
+        <div class="cover-card">
+          <div class="cover-card-title">Attendance & Geofencing</div>
+          <div class="cover-card-val">Haversine GPS Engine + Dynamic QR Gate</div>
+        </div>
+        <div class="cover-card">
+          <div class="cover-card-title">Mobile Ecosystem</div>
+          <div class="cover-card-val">AttendX Mobile (React Native / KMP Ready)</div>
+        </div>
+        <div class="cover-card">
+          <div class="cover-card-title">Compensation & Finance</div>
+          <div class="cover-card-val">Dynamic Payroll Engine + EPF/ETF Deductions</div>
+        </div>
+        <div class="cover-card">
+          <div class="cover-card-title">Access Control</div>
+          <div class="cover-card-val">5-Tier RBAC + RLS Database Security</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-footer">
+      <div>
+        <strong>Author & Lead Engineer:</strong> Kalpa Wishvajith<br/>
+        <strong>Repository:</strong> github.com/midiz-io/HR-Management-System
+      </div>
+      <div style="text-align: right;">
+        <strong>Document Status:</strong> Complete & Verified<br/>
+        <strong>Classification:</strong> Master Engineering Document
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TABLE OF CONTENTS & EXECUTIVE SUMMARY -->
+  <!-- ========================================== -->
+  <div class="page-break">
+    <h2>1. Executive Summary & Core Value Proposition</h2>
+    <p>
+      The <strong>AttendX HR & Workforce Management System</strong> is a cloud-native, enterprise-grade Human Capital Management (HCM) platform engineered to streamline workforce tracking, attendance authentication, smart roster scheduling, multi-tiered leave workflows, overtime governance, employee welfare operations, and automated payroll calculation for modern distributed organizations.
+    </p>
+
+    <div class="card card-highlight">
+      <strong>Core Architectural Philosophy:</strong>
+      <p style="margin: 4px 0 0 0;">
+        AttendX bridges physical workplace presence and digital governance using real-time geofencing algorithms, dynamic cryptographic QR gate passes, automated probation/accrual tracking, and complete financial audit trails. It eliminates attendance fraud (buddy punching), automates complex scheduling across geographical branches, and provides unified corporate oversight.
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <span class="badge badge-blue">Geofenced Punching</span>
+        <h4 style="margin: 6px 0 2px 0;">Sub-Meter Accuracy</h4>
+        <p style="font-size: 8pt; margin: 0;">Haversine distance formula validating exact employee coordinates against branch boundaries with dynamic radius checking.</p>
+      </div>
+      <div class="card">
+        <span class="badge badge-green">Flexible Roster</span>
+        <h4 style="margin: 6px 0 2px 0;">Bulk Scheduling</h4>
+        <p style="font-size: 8pt; margin: 0;">Multi-employee shift scheduling with daily, shift-matching, or custom recurrent day patterns (e.g., Mon/Wed/Sat).</p>
+      </div>
+      <div class="card">
+        <span class="badge badge-purple">Automated Payroll</span>
+        <h4 style="margin: 6px 0 2px 0;">Statutory Precision</h4>
+        <p style="font-size: 8pt; margin: 0;">Integrated salary configurations, overtime calculations, EPF/ETF statutory taxes, salary advances, and digital PDF payslips.</p>
+      </div>
+    </div>
+
+    <h2>2. System Architecture & High-Level Design</h2>
+    <p>
+      The platform adopts an event-driven, decoupled micro-architecture combining a Next.js serverless backend, real-time database subscriptions via Supabase, client-side caching, and multi-platform mobile consumers.
+    </p>
+
+    <div class="card">
+      <pre>
++---------------------------------------------------------------------------------------------------+
+|                                  ATTENDX ARCHITECTURAL TOPOLOGY                                   |
+|                               DEVELOPED BY :- KALPA WISHVAJITH                                    |
++---------------------------------------------------------------------------------------------------+
+|  [ Web Admin / Manager Portal ]          [ Employee Self-Service ]        [ Mobile Companion ]    |
+|    - Next.js 14 Pages / SSR                - React 18 / Radix UI           - React Native / Expo  |
+|    - Tailwind CSS / Recharts               - QR Gate Scanner Pass          - Kotlin Multiplatform |
++----------------------------------------------------+----------------------------------------------+
+                                                     | HTTPS / WSS / JWT Auth
++----------------------------------------------------v----------------------------------------------+
+|                                    NEXT.JS SERVERLESS API LAYER                                   |
+|  /api/attendance  |  /api/rosters  |  /api/leaves  |  /api/ot-requests  |  /api/payroll  | /api/gate |
+|  - Geofence Distance Engine       - Smart Probation Policy Gate        - Cron Dispatcher Hub       |
+|  - Auto-Checkout Watchdog         - PDF Generator (PDFKit/jsPDF)       - WebPush / WhatsApp Alerts |
++----------------------------------------------------+----------------------------------------------+
+                                                     | Prisma ORM (Connection Pooler)
++----------------------------------------------------v----------------------------------------------+
+|                             SUPABASE POSTGRESQL MULTI-TENANT DATABASE                             |
+|  - 28 Relational Models           - Row Level Security (RLS)           - Automated SQL Backups    |
+|  - Realtime Changefeed            - Storage Buckets (Docs/Proofs)      - Audit Log & Trash Engine |
++---------------------------------------------------------------------------------------------------+
+      </pre>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="color: #0369a1;">Backend & Computation Tier</h4>
+        <ul>
+          <li><strong>Runtime:</strong> Node.js 18+ on Next.js Serverless runtime</li>
+          <li><strong>Database Engine:</strong> PostgreSQL 15 hosted on Supabase</li>
+          <li><strong>Object Relational Mapping:</strong> Prisma 5.19 with transaction safety</li>
+          <li><strong>Connection Pooling:</strong> PgBouncer session & transaction pooling</li>
+          <li><strong>Background Workers:</strong> Cron dispatchers for automated checkouts, late sweeps, and WhatsApp reports</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color: #0369a1;">Frontend & Mobile Ecosystem</h4>
+        <ul>
+          <li><strong>UI Framework:</strong> React 18, Radix UI Primitives, Lucide Icons</li>
+          <li><strong>Styling System:</strong> Tailwind CSS with responsive layout tokens</li>
+          <li><strong>Visualizations:</strong> Recharts analytical charts & monthly trends</li>
+          <li><strong>Mobile App:</strong> React Native / Expo (`attendx-mobile`) + Kotlin Multiplatform (KMP) master specification</li>
+          <li><strong>Hardware Bridges:</strong> HTML5 QR Scanner, Camera, Geolocation API</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- GEOFENCING & ATTENDANCE -->
+  <!-- ========================================== -->
+  <div class="page-break">
+    <h2>3. Geofencing Attendance & Location Intelligence Engine</h2>
+    <p>
+      The attendance verification subsystem enforces strict geographical validation using the spherical Haversine formula to ensure employees are physically present within authorized office coordinates before a punch is accepted.
+    </p>
+
+    <div class="card card-highlight">
+      <h4 style="color: #0284c7; margin-bottom: 4px;">Haversine Distance Formulation</h4>
+      <p style="font-size: 8.5pt; margin-bottom: 6px;">
+        The system evaluates coordinates <code>(lat1, lon1)</code> from the client device against office boundaries <code>(lat2, lon2)</code>:
+      </p>
+      <pre>
+const R = 6371e3; // Earth radius in meters
+const phi1 = (lat1 * Math.PI) / 180;
+const phi2 = (lat2 * Math.PI) / 180;
+const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+
+const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+          Math.cos(phi1) * Math.cos(phi2) *
+          Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+const distance = R * c; // Distance in meters
+
+const isWithinGeofence = distance <= allowedRadiusMeters;
+      </pre>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="color: #0369a1;">Attendance Status State Machine</h4>
+        <table>
+          <thead>
+            <tr><th>Status</th><th>Criteria & Trigger Condition</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>PRESENT</code></td><td>Check-in within shift scheduled window + grace period.</td></tr>
+            <tr><td><code>LATE</code></td><td>Check-in past grace period; increments Late Tracker.</td></tr>
+            <tr><td><code>ABSENT</code></td><td>No check-in recorded by scheduled shift end cutoff.</td></tr>
+            <tr><td><code>HALF_DAY</code></td><td>Work duration meets half-day quota or approved leave.</td></tr>
+            <tr><td><code>SHORT_LEAVE</code></td><td>Gate pass verified check-out/in within 1.5 - 2 hrs.</td></tr>
+            <tr><td><code>ON_LEAVE</code></td><td>Active approved leave request covers date.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h4 style="color: #0369a1;">Automated Checkout & Watchdog</h4>
+        <ul>
+          <li><strong>Per-User Auto Checkout:</strong> Individual toggle <code>autoCheckoutEnabled</code> with customizable working hour thresholds (e.g., 8.0, 9.0 hrs).</li>
+          <li><strong>Cron Auto Checkout:</strong> Scheduled nightly cron job sweeping unclosed check-ins, marking checkout timestamps with an administrative flag.</li>
+          <li><strong>Late Attendance Tracker:</strong> Aggregates consecutive and cumulative late strikes; issues automated warnings and triggers HR review triggers.</li>
+          <li><strong>Kiosk Gate Scanner:</strong> Dedicated physical terminal mode allowing employees to punch via dynamic QR code scanning on security gates.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>4. Multi-Shift Scheduling & Bulk Roster Management</h2>
+    <p>
+      Managing shifts across multiple branches and departments is streamlined through the newly developed <strong>Bulk Roster Engine</strong>:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Scheduling Mode</th>
+          <th>Behavior & Execution Mechanics</th>
+          <th>Target Use Case</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Daily Repeat</strong></td>
+          <td>Applies the selected shift to every sequential day across the configured date window without day-of-week skipping.</td>
+          <td>Continuous operation sites, security officers, 24/7 technical shifts.</td>
+        </tr>
+        <tr>
+          <td><strong>Repeat by Shift Days</strong></td>
+          <td>Filters and matches the default standard working days predefined in the Shift profile (e.g., Monday through Friday).</td>
+          <td>Headquarters corporate staff, standard operational departments.</td>
+        </tr>
+        <tr>
+          <td><strong>Day-by-Day (Custom)</strong></td>
+          <td>Allows managers to manually toggle active operational days (e.g., Mon, Wed, Sat) with ongoing recurrence or fixed deadlines.</td>
+          <td>Part-time employees, rotational shift engineers, medical staff.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card card-success">
+      <strong>Off-Day & Shift Swap Governance:</strong>
+      <p style="margin: 4px 0 0 0; font-size: 8.5pt;">
+        Employees can initiate formal <code>OffDayRequest</code> submissions. The workflow enforces a two-tier review hierarchy: the <em>Department Sectional Head / Recommender</em> validates team capacity before forwarding to <em>HR / Reviewer</em> for final roster mutation.
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- LEAVE, PROBATION, OT & PAYROLL -->
+  <!-- ========================================== -->
+  <div class="page-break">
+    <h2>5. Leave Governance, Smart Probation & Gate Passes</h2>
+    <p>
+      The leave management subsystem balances employee flexibility with operational continuity through granular leave type balances and probation protection rules:
+    </p>
+
+    <div class="grid-2">
+      <div class="card card-warning">
+        <h4 style="color: #b45309;">Smart Probation Leave Policy</h4>
+        <ul>
+          <li><strong>3-Month Probation Window:</strong> Calculated automatically from <code>User.joinDate</code>.</li>
+          <li><strong>Half-Day Eligibility:</strong> Employees during their initial 90 days are entitled to <strong>one half-day leave per calendar month</strong>.</li>
+          <li><strong>Full-Day Lock:</strong> Full-day annual and casual leaves remain locked until the probation period completes, preventing policy violations.</li>
+          <li><strong>Dynamic Countdown:</strong> Portal displays the exact days remaining until full leave eligibility is unlocked.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 style="color: #0369a1;">Gate Passes & Short Leaves</h4>
+        <ul>
+          <li><strong>Gate Pass Workflows:</strong> Submissions with official/personal designations, departure time, and vehicle/contact metadata.</li>
+          <li><strong>Security Gate Check:</strong> Dedicated QR Code verification endpoint at security checkpoints records departure and re-entry punches.</li>
+          <li><strong>Short Leave Quota:</strong> Limits short absences (up to 2 hours) to statutory limits without deducting full annual balances.</li>
+          <li><strong>Real-time Status:</strong> Managers monitor pending gate pass checkouts directly on the operational dashboard.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>6. Overtime (OT) Automation & Approval Hierarchy</h2>
+    <p>
+      Overtime is managed via structured requests (<code>OTRequest</code>) requiring dual validation. Employees request extra hours either proactively or post-shift, accompanied by justification notes and task references.
+    </p>
+
+    <div class="card">
+      <pre>
+[ Employee Submits OT Request ] ---> [ Sectional Head Evaluates Work Output ]
+                                                    |
+                                    +---------------+---------------+
+                                    | Approved                      | Rejected
+                                    v                               v
+                     [ HR / Finance Verification ]           [ Request Archived ]
+                                    |
+                                    v
+                     [ Credited to Payroll Engine ]
+      </pre>
+    </div>
+
+    <h2>7. Automated Payroll Engine & Statutory Precision</h2>
+    <p>
+      The payroll module automates salary calculations using employee <code>SalaryConfig</code>, incorporating attendance logs, overtime hours, salary advances, statutory taxes, and voluntary corporate deductions.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Classification</th>
+          <th>Calculation Logic & Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Basic Salary</strong></td><td>Fixed Earnings</td><td>Contractual monthly base amount from <code>SalaryConfig.basicSalary</code>.</td></tr>
+        <tr><td><strong>Allowances & Incentives</strong></td><td>Variable Earnings</td><td>Fixed allowances, attendance bonuses, and performance incentives.</td></tr>
+        <tr><td><strong>Overtime (OT) Pay</strong></td><td>Calculated Earnings</td><td>Approved OT hours multiplied by statutory hourly OT multiplier.</td></tr>
+        <tr><td><strong>Employee EPF (8%)</strong></td><td>Statutory Deduction</td><td>8% deducted from total earnings eligible for provident fund.</td></tr>
+        <tr><td><strong>Employer EPF (12%)</strong></td><td>Employer Contribution</td><td>12% paid by organization into Central Bank provident scheme.</td></tr>
+        <tr><td><strong>Employer ETF (3%)</strong></td><td>Employer Contribution</td><td>3% contributed to Employee Trust Fund.</td></tr>
+        <tr><td><strong>Salary Advances</strong></td><td>Voluntary Deduction</td><td>Sum of approved <code>SalaryAdvanceRequest</code> payouts for the active cycle.</td></tr>
+        <tr><td><strong>Welfare / Pending Bills</strong></td><td>Internal Deduction</td><td>Deductions from seafood orders and employee cafeteria purchases.</td></tr>
+        <tr><td><strong>Unpaid Absences</strong></td><td>Attendance Deduction</td><td>Daily rate multiplied by unexcused absent days.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card card-highlight">
+      <strong>Real-Time Daily Salary Banner:</strong>
+      <p style="margin: 4px 0 0 0; font-size: 8.5pt;">
+        Employees have access to a real-time daily earnings dashboard component (<code>EmployeeDailySalaryBanner.tsx</code>) showing accrued compensation based on verified punches to date, promoting organizational transparency.
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- CORPORATE WELFARE & DATABASE SCHEMA -->
+  <!-- ========================================== -->
+  <div class="page-break">
+    <h2>8. Corporate Welfare, Food Orders & Pending Bills</h2>
+    <p>
+      AttendX provides integrated enterprise welfare modules for streamlined cafeteria logistics and staff grocery schemes:
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="color: #0369a1;">Cafeteria & Meal Ordering</h4>
+        <ul>
+          <li>Daily meal catalog with breakfast, lunch, and dinner selections.</li>
+          <li>Kitchen ordering cut-off times with automatic order aggregation.</li>
+          <li>HR approval and headcount verification for caterer billing.</li>
+          <li>Dietary restrictions and special request tracking.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 style="color: #0369a1;">Seafood Orders & Staff Credit Scheme</h4>
+        <ul>
+          <li>Internal grocery/seafood purchasing with subsidized pricing.</li>
+          <li>Sales dispatch status tracking: Ordered -> Dispatched -> Received.</li>
+          <li>Dedicated <code>PendingBillAccount</code> ledger for staff credit.</li>
+          <li>One-click monthly deduction roll-up into the payroll pipeline.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>9. Complete Relational Database Architecture (Prisma)</h2>
+    <p>
+      The underlying PostgreSQL database contains 28 robust relational models designed for high-concurrency enterprise workloads:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Entity / Model</th>
+          <th>Primary Key / Foreign Keys</th>
+          <th>Purpose & Relationships</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>User</code></td>
+          <td><code>id (UUID)</code>, <code>departmentId</code>, <code>locationId</code></td>
+          <td>Central employee record, authentication identity, role, resignation flags, and relation roots.</td>
+        </tr>
+        <tr>
+          <td><code>Attendance</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>locationId</code></td>
+          <td>Daily punch logs, timestamps, coordinates, verification flags, and checkout triggers.</td>
+        </tr>
+        <tr>
+          <td><code>WorkShift</code></td>
+          <td><code>id (UUID)</code></td>
+          <td>Shift templates, start/end schedules, grace durations, and assigned working days.</td>
+        </tr>
+        <tr>
+          <td><code>Roster</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>shiftId</code>, <code>locationId</code></td>
+          <td>Calendar schedule assigning an employee to a shift and physical work location.</td>
+        </tr>
+        <tr>
+          <td><code>LeaveRequest</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>reviewerId</code></td>
+          <td>Leave applications, dates, categories, attachments, and hierarchical approval states.</td>
+        </tr>
+        <tr>
+          <td><code>LeaveBalance</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>leaveTypeId</code></td>
+          <td>Available, used, and accrued quotas per employee per leave category.</td>
+        </tr>
+        <tr>
+          <td><code>OTRequest</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>reviewerId</code></td>
+          <td>Overtime hour logging, pre/post justifications, and payroll integration linkage.</td>
+        </tr>
+        <tr>
+          <td><code>SalaryConfig</code></td>
+          <td><code>id (UUID)</code>, <code>userId (Unique)</code></td>
+          <td>Base compensation rates, standard allowance matrix, and statutory tax parameters.</td>
+        </tr>
+        <tr>
+          <td><code>Payroll</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code></td>
+          <td>Monthly processed salary sheets, net payouts, tax breakdowns, and payslip data.</td>
+        </tr>
+        <tr>
+          <td><code>GatePassRequest</code></td>
+          <td><code>id (UUID)</code>, <code>userId</code>, <code>reviewerId</code></td>
+          <td>Official/personal exit permissions, vehicle details, and gate QR pass checkout.</td>
+        </tr>
+        <tr>
+          <td><code>CompanyDocument</code></td>
+          <td><code>id (UUID)</code>, <code>creatorId</code></td>
+          <td>Corporate policies, SOP manuals, and mandatory employee acknowledgement tracking.</td>
+        </tr>
+        <tr>
+          <td><code>TrashRecord</code></td>
+          <td><code>id (UUID)</code></td>
+          <td>Soft-deletion recovery registry enabling point-in-time entity restoration.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- API CONTRACT, SECURITY & OPERATIONS -->
+  <!-- ========================================== -->
+  <div class="page-break">
+    <h2>10. REST API Specification & Mobile Contract</h2>
+    <p>
+      The API layer exposes standardized endpoints secured with JWT tokens and Supabase session validation:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Method & Route</th>
+          <th>Access Role</th>
+          <th>Description & Payloads</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>POST /api/attendance</code></td>
+          <td>Employee / Kiosk</td>
+          <td>Submit check-in/out punch with latitude, longitude, and device metadata.</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/rosters/bulk</code></td>
+          <td>Admin / Manager</td>
+          <td>Assign multi-employee bulk rosters with recurrence patterns (daily, shift, custom).</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/leaves/request</code></td>
+          <td>Employee</td>
+          <td>Submit leave with type, dates, reason, and attachment URLs. Validates probation rule.</td>
+        </tr>
+        <tr>
+          <td><code>GET /api/payroll/process</code></td>
+          <td>Admin / Super Admin</td>
+          <td>Trigger monthly payroll calculation, EPF/ETF computation, and payslip rendering.</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/requests/gate-pass</code></td>
+          <td>Employee</td>
+          <td>Generate exit gate pass. Returns cryptographic token for security gate scanner.</td>
+        </tr>
+        <tr>
+          <td><code>POST /api/admin/database-backup</code></td>
+          <td>Super Admin</td>
+          <td>Trigger on-demand SQL dump and sync to cloud redundancy storage.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>11. Security, Role-Based Access Control & Database Backup</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h4 style="color: #0369a1;">Role-Based Access Control (RBAC)</h4>
+        <ul>
+          <li><strong>SUPER_ADMIN:</strong> Unrestricted system control, database backups, financial settings, and user provisioning.</li>
+          <li><strong>ADMIN:</strong> HR management, leave reviews, roster generation, and payroll approvals.</li>
+          <li><strong>MANAGER:</strong> Branch roster adjustments, team attendance auditing, and gate pass approvals.</li>
+          <li><strong>SECTIONAL_HEAD:</strong> Department-level task delegation and off-day recommendations.</li>
+          <li><strong>EMPLOYEE:</strong> Self-service punches, payslip downloads, leave/OT filings, and welfare orders.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h4 style="color: #0369a1;">Automated Database Backup Engine</h4>
+        <ul>
+          <li><strong>Automated SQL Snapshots:</strong> Full table schemas, relational data dumps, and foreign key cascades.</li>
+          <li><strong>Dual Redundancy:</strong> Local disk storage + automated Google Drive cloud replication.</li>
+          <li><strong>Point-in-Time Recovery:</strong> Soft-delete trash archive allows instant recovery of deleted users or shifts without database downtime.</li>
+          <li><strong>Secure Vault:</strong> Sensitive keys encrypted at rest using industry-standard protocols.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>12. Engineering Ownership & Project Attributions</h2>
+    <div class="card card-highlight" style="padding: 16px; text-align: center;">
+      <h3 style="font-size: 14pt; margin-bottom: 6px; color: #0284c7;">ATTENDX ENTERPRISE HR & WORKFORCE MANAGEMENT SYSTEM</h3>
+      <div class="watermark-banner" style="margin: 10px auto; max-width: 500px;">
+        DEVELOPED BY :- KALPA WISHVAJITH
+      </div>
+      <p style="font-size: 9pt; color: #334155; max-width: 650px; margin: 10px auto;">
+        Engineered with precision to deliver modern workforce automation, sub-meter geofenced attendance tracking, dynamic multi-shift roster allocation, statutory payroll compliance, and cross-platform mobile connectivity.
+      </p>
+      <div style="font-size: 8pt; color: #64748b; margin-top: 10px;">
+        Official Repository: <a href="https://github.com/midiz-io/HR-Management-System" style="color: #0284c7;">https://github.com/midiz-io/HR-Management-System</a> &bull; All Rights Reserved
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

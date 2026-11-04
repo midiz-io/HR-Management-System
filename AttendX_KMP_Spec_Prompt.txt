@@ -1,0 +1,231 @@
+================================================================================
+ATTENDX MOBILE - KOTLIN MULTIPLATFORM (KMP) SPECIFICATION & MASTER PROMPT GUIDE
+================================================================================
+
+Overview:
+Target Platforms: Android and iOS
+UI Framework: Compose Multiplatform (Material 3)
+Architecture: Clean Architecture (Presentation, Domain, Data) with MVVM / MVI
+Networking: Ktor Client (ContentNegotiation, Kotlinx.Serialization, Bearer Auth)
+Local Storage: Multiplatform Settings (Encrypted) + SQLDelight / Room KMP
+Dependency Injection: Koin KMP
+Location Engine: Google FusedLocation (Android) & CoreLocation (iOS) via expect/actual
+Target Backend: Next.js API Routes & Supabase Backend
+
+--------------------------------------------------------------------------------
+1. REST API CONTRACT SPECIFICATIONS
+--------------------------------------------------------------------------------
+
+1.1 Authentication & Session
+- Endpoint: POST /auth/v1/token?grant_type=password (Supabase Auth / Next.js)
+  Headers: 
+    apikey: <SUPABASE_ANON_KEY>
+    Content-Type: application/json
+  Request:
+    {
+      "email": "employee@example.com",
+      "password": "secure_password"
+    }
+  Response (200 OK):
+    {
+      "access_token": "eyJhbGciOi...",
+      "refresh_token": "v-d8fsf...",
+      "user": {
+        "id": "e4f53c12-32...",
+        "email": "employee@example.com"
+      }
+    }
+
+1.2 User Profile
+- Endpoint: GET /api/user/profile
+  Headers: 
+    Authorization: Bearer <access_token>
+  Response (200 OK):
+    {
+      "id": "e4f53c12-32...",
+      "name": "Employee Name",
+      "email": "employee@example.com",
+      "role": "EMPLOYEE",
+      "department": "IT Support"
+    }
+
+1.3 Geofence Office Locations
+- Endpoint: GET /api/locations
+  Headers: 
+    Authorization: Bearer <access_token>
+  Response (200 OK):
+    [
+      {
+        "id": "loc_colombo_01",
+        "name": "Head Office - Colombo",
+        "latitude": 6.9271,
+        "longitude": 79.8612,
+        "radius": 150.0
+      }
+    ]
+
+1.4 Attendance Punch (Check-In & Check-Out)
+- Endpoint: GET /api/attendance
+  Headers: 
+    Authorization: Bearer <access_token>
+  Response: List of user attendance logs.
+
+- Endpoint: POST /api/attendance
+  Headers: 
+    Authorization: Bearer <access_token>
+    Content-Type: application/json
+  Request:
+    {
+      "locationId": "loc_colombo_01",
+      "latitude": 6.92714,
+      "longitude": 79.86121,
+      "type": "CHECK_IN" 
+    }
+    (Note: type can be either "CHECK_IN" or "CHECK_OUT")
+  Response (200 OK):
+    {
+      "success": true,
+      "message": "Punch recorded successfully",
+      "isLate": false
+    }
+
+1.5 Gate Pass / Admin QR Punch
+- Endpoint: POST /api/admin/scan-punch
+  Headers: 
+    x-gate-passcode: HR
+    Content-Type: application/json
+  Request:
+    {
+      "userId": "user_guid_123",
+      "locationId": "loc_colombo_01"
+    }
+  Response (200 OK):
+    {
+      "success": true,
+      "punchType": "CHECK_IN",
+      "userName": "Employee Name"
+    }
+
+1.6 Leave Management
+- Endpoint: GET /api/leave-balances
+  Response:
+    [
+      { "type": "ANNUAL", "allocated": 14, "used": 3, "remaining": 11 },
+      { "type": "CASUAL", "allocated": 7, "used": 2, "remaining": 5 },
+      { "type": "MEDICAL", "allocated": 7, "used": 0, "remaining": 7 }
+    ]
+
+- Endpoint: POST /api/leave-requests
+  Request:
+    {
+      "leaveTypeId": "leave_type_guid",
+      "startDate": "2026-10-15",
+      "endDate": "2026-10-16",
+      "reason": "Family emergency"
+    }
+
+--------------------------------------------------------------------------------
+2. GOOGLE AI STUDIO MASTER PROMPT (PLAIN TEXT READY)
+--------------------------------------------------------------------------------
+(Copy the section below directly into Google AI Studio chat or system prompt)
+
+ROLE AND OBJECTIVE:
+You are an expert Principal Mobile Software Architect specializing in Kotlin
+Multiplatform (KMP) and Compose Multiplatform for Android and iOS.
+Your goal is to design and develop a production-ready, beautiful, modern Geofencing
+Attendance & HR Employee Self-Service Mobile Application named 'AttendX'.
+The backend is powered by Next.js API Routes and Supabase.
+
+TECH STACK GUIDELINES:
+- Target: Android and iOS via Compose Multiplatform (Jetpack Compose shared UI)
+- UI Design: Material 3, Dark/Light mode, Smooth animations, Card components
+- State Management: MVVM / MVI using ViewModel and StateFlow / SharedFlow
+- Networking: Ktor Client (CIO for Android / Darwin for iOS), Kotlinx Serialization
+- Storage: Multiplatform Settings (Encrypted for auth tokens) and Room/SQLDelight
+- Dependency Injection: Koin Multiplatform
+- Location: expect/actual pattern (Google FusedLocation on Android, CLLocation on iOS)
+- Navigation: Compose Multiplatform Navigation or Voyager
+
+ARCHITECTURE AND QUALITY STANDARDS:
+- Follow strict Clean Architecture:
+  1. Data layer: DTOs, API services, Repository implementations, Data sources
+  2. Domain layer: Business models, Repository interfaces, Use cases
+  3. Presentation layer: UI screens, Components, ViewModels, UI State, UI Events
+- Keep common code in commonMain; native bridges strictly in androidMain / iosMain.
+- Include proper error handling, network failure recovery, loading states, and offline queueing.
+
+--------------------------------------------------------------------------------
+MODULE 1: PROJECT SETUP & FOUNDATION
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. Complete Gradle scripts (root build.gradle.kts and composeApp/build.gradle.kts)
+   with all multiplatform plugins and dependencies configured.
+2. Setup Ktor Client singleton with JSON serialization, logging, and token refresh.
+3. Setup Koin dependency injection modules in commonMain.
+4. Setup generic Result/Resource class and ApiError exception wrapper.
+
+--------------------------------------------------------------------------------
+MODULE 2: AUTHENTICATION & SECURE SESSION
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. Data models: AuthRequest, AuthResponse, UserProfile, SessionToken.
+2. TokenStorage interface in commonMain with expect/actual implementations:
+   - Android: EncryptedSharedPreferences
+   - iOS: Keychain via Multiplatform Settings
+3. AuthRepository and LoginUseCase handling login, auto-refresh, and logout.
+4. Presentation:
+   - Modern Splash Screen (session check and auto redirect).
+   - Premium Login Screen (animated inputs, biometric prompt hook, error display).
+   - AuthViewModel with StateFlow (Idle, Loading, Success, Error).
+
+--------------------------------------------------------------------------------
+MODULE 3: LOCATION & GEOFENCING CORE (EXPECT / ACTUAL)
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. Common interface LocationTracker with suspend function getCurrentLocation()
+   and observeLocationUpdates() flow.
+2. Android implementation in androidMain using Google Play Services
+   FusedLocationProviderClient with runtime permission checks.
+3. iOS implementation in iosMain using CLLocationManager with delegate callbacks.
+4. Geofencing calculation helper in commonMain: Haversine distance formula to
+   verify whether coordinates fall within an office radius in meters.
+
+--------------------------------------------------------------------------------
+MODULE 4: ATTENDANCE & REAL-TIME CHECK-IN / CHECK-OUT
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. API Service and Repository for fetching locations, attendance history,
+   and posting check-in/check-out punch records.
+2. Offline Queue: local persistence of pending punch records when offline.
+3. Presentation (Dashboard & Punch UI):
+   - Circular animated punch button displaying current attendance status.
+   - Live Geofence status card with real-time distance and color indicators.
+   - Digital clock showing local time and shift details.
+   - History list showing today's punch timestamps and total work hours.
+
+--------------------------------------------------------------------------------
+MODULE 5: QR SCANNER PUNCH (ADMIN / GATEPASS MODE)
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. Camera/QR scanner Compose component for Android (CameraX) and iOS (AVFoundation).
+2. API integration for POST /api/admin/scan-punch using x-gate-passcode header.
+3. Scanner UI with animated laser scanner overlay, beep/haptic feedback,
+   and employee verification confirmation card.
+
+--------------------------------------------------------------------------------
+MODULE 6: LEAVE MANAGEMENT & EMPLOYEE DASHBOARD
+--------------------------------------------------------------------------------
+Tasks to produce:
+1. Models: LeaveBalance, LeaveRequest, LeaveType.
+2. API integration for GET /api/leave-balances and POST /api/leave-requests.
+3. Presentation:
+   - Leave balance visual cards (Annual, Casual, Medical) with progress bars.
+   - Leave application sheet with date range picker, leave type selection,
+     and reason form.
+   - Pending leave requests status list with pull-to-refresh.
+
+--------------------------------------------------------------------------------
+EXECUTION INSTRUCTION FOR AI STUDIO:
+Begin by producing Module 1 and Module 2 completely with full code, imports, and
+directory structure. Wait for confirmation before producing the next modules.
+================================================================================
