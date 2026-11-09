@@ -19,7 +19,7 @@ import otpAnimation from "../../public/Verification Code - OTP V2.json";
 
 const LoginPage = () => {
   const router = useRouter();
-  const { initializing, signIn } = useContext(AuthContext);
+  const { initializing, signIn, signOut } = useContext(AuthContext);
   const [showPw, setShowPw] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { isIframe } = useIsIFrame();
@@ -31,24 +31,38 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       const { email, password } = formik.values;
-      await signIn(email, password);
+      const cleanEmail = email.trim().toLowerCase();
 
-      // Check user role using the API endpoint
-      const response = await fetch('/api/user');
+      let loggedInUser: any = null;
+      try {
+        loggedInUser = await signIn(cleanEmail, password);
+      } catch (authError) {
+        // If Supabase authentication failed, AuthContext has already displayed the specific error toast
+        return;
+      }
+
+      // Check user role using the API endpoint with Authorization header to prevent cookie sync latency
+      const userId = loggedInUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      const response = await fetch('/api/user', {
+        headers: userId ? { 'Authorization': userId } : undefined,
+      });
+
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error || 'Failed to fetch user data');
       }
 
       const userData = await response.json();
 
       if (userData.isResigned) {
-        await signOut();
+        if (signOut) {
+          await signOut();
+        }
         toast({
           variant: "destructive",
           title: "Access Denied",
           description: "Cannot log in: Account is inactive or resigned.",
         });
-        setIsLoading(false);
         return;
       }
 
@@ -57,12 +71,12 @@ const LoginPage = () => {
       } else {
         router.push('/dashboard');
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error('Login process error:', error);
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error?.message || "Please check your credentials and try again.",
       });
     } finally {
       setIsLoading(false);

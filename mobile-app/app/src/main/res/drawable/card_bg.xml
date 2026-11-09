@@ -1,0 +1,56 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="400dp"
+    android:height="200dp"
+    android:viewportWidth="800"
+    android:viewportHeight="400">
+
+    <!-- Soft Sky Blue Background Gradient / Fill -->
+    <path
+        android:fillColor="#EBF8FF"
+        android:pathData="M0,0h800v400H0z"/>
+
+    <!-- Fluffy White Clouds -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M180,120 c-10,0 -20,5 -25,12 c-15,0 -25,10 -25,23 c0,13 10,23 25,23 h60 c15,0 25,-10 25,-23 c0,-11 -8,-20 -20,-22 c-5,-7 -15,-12 -25,-12 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M520,100 c-8,0 -16,4 -20,10 c-12,0 -20,8 -20,18 c0,10 8,18 20,18 h48 c12,0 20,-8 20,-18 c0,-9 -6,-16 -16,-18 c-4,-6 -12,-10 -20,-10 z" />
+
+    <!-- Colombo Skyline Illustration Silhouette -->
+    <path
+        android:fillColor="#CBD5E1"
+        android:strokeColor="#64748B"
+        android:strokeWidth="1.5"
+        android:pathData="
+            M0,400 L0,320
+            L40,320 L40,290 L90,290 L90,320
+            L120,320 L120,220 L150,220 L150,320
+            L180,320 L180,270 L230,320
+            L270,320 L270,250 L320,250 L320,320
+            L350,320 L350,180 L400,180 L400,320
+            L440,320 L440,140 L480,140 L480,320
+            L520,320 L520,120 L580,120 L580,320
+            L620,320 L620,220 L680,220 L680,320
+            L720,320 L720,250 L770,250 L770,320
+            L800,320 L800,400 Z" />
+
+    <!-- Iconic Lotus Tower -->
+    <path
+        android:fillColor="#94A3B8"
+        android:strokeColor="#334155"
+        android:strokeWidth="1.5"
+        android:pathData="M395,400 L395,160 L392,100 L390,70 L395,20 L400,70 L398,100 L395,160 Z" />
+    <path
+        android:fillColor="#E2E8F0"
+        android:strokeColor="#334155"
+        android:strokeWidth="1.5"
+        android:pathData="M380,85 C380,65 410,65 410,85 C410,105 380,105 380,85 Z" />
+
+    <!-- Twin Towers -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:strokeColor="#475569"
+        android:strokeWidth="1.5"
+        android:pathData="M510,320 L510,100 L555,100 L555,320 Z M570,320 L570,110 L615,110 L615,320 Z" />
+</vector>

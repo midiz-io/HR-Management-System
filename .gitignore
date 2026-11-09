@@ -40,3 +40,13 @@ tmp/
 *.tsbuildinfo
 next-env.d.ts
 public/uploads/
+
+# android / mobile-app
+mobile-app/.gradle/
+mobile-app/**/build/
+mobile-app/build/
+mobile-app/**/release/
+mobile-app/local.properties
+mobile-app/.idea/
+mobile-app/.artifacts/
+

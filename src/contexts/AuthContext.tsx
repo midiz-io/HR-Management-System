@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 interface AuthContextType {
   user: User | null;
   createUser: (user: User, role?: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<User | null>;
   signUp: (email: string, password: string, role?: string) => Promise<void>;
   signInWithMagicLink: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -19,7 +19,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   createUser: async () => {},
-  signIn: async () => {},
+  signIn: async () => null,
   signUp: async () => {},
   signInWithMagicLink: async () => {},
   signInWithGoogle: async () => {},
@@ -79,10 +79,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const createUser = useCallback(async (user: User, role: string = 'EMPLOYEE') => {
     try {
+      // Use the API endpoint with direct user authorization header
       const response = await fetch('/api/user', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': user.id,
         },
       });
       
@@ -95,6 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': user.id,
           },
           body: JSON.stringify({ role }),
         });
@@ -114,8 +117,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [toast]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error && data.user) {
+    const cleanEmail = email.trim().toLowerCase();
+    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    if (!error && data?.user) {
       await createUser(data.user);
     }
     
@@ -132,11 +136,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         description: "You have successfully signed in",
       });
     }
+    return data?.user ?? null;
   }, [supabase, createUser, toast]);
 
   const signUp = useCallback(async (email: string, password: string, role: string = 'EMPLOYEE') => {
+    const cleanEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password
     });
 
@@ -167,8 +173,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [supabase, createUser, toast]);
 
   const signInWithMagicLink = useCallback(async (email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signInWithOtp({
-      email,
+      email: cleanEmail,
       options: {
         shouldCreateUser: true,
         emailRedirectTo: `${window.location.origin}/dashboard`,
@@ -237,7 +244,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [supabase, toast, router]);
 
   const resetPassword = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const cleanEmail = email.trim().toLowerCase();
+    const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) {
