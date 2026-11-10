@@ -118,7 +118,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signIn = useCallback(async (email: string, password: string) => {
     const cleanEmail = email.trim().toLowerCase();
-    const { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+    let { data, error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+
+    // Self-healing fallback: if Supabase Auth fails (e.g. Admin password was reset or role was promoted
+    // to ADMIN without Supabase auth.users sync), verify against SystemSetting/default role credentials
+    // and synchronize auth.users before retrying.
+    if (error) {
+      try {
+        const syncResponse = await fetch('/api/auth/sync-credentials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail, password }),
+        });
+        if (syncResponse.ok) {
+          const syncResult = await syncResponse.json();
+          if (syncResult?.synced) {
+            const retryAuth = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+            data = retryAuth.data;
+            error = retryAuth.error;
+          }
+        }
+      } catch (syncErr) {
+        console.warn('Credential sync fallback failed:', syncErr);
+      }
+    }
+
     if (!error && data?.user) {
       await createUser(data.user);
     }

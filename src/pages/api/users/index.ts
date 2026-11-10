@@ -16,7 +16,8 @@ async function attachPasswordsToUsers(users: any[]) {
   }
 
   return users.map((u) => {
-    const savedPassword = passwordsMap[u.id] || passwordsMap[u.email];
+    const cleanEmail = (u.email || '').trim().toLowerCase();
+    const savedPassword = passwordsMap[u.id] || passwordsMap[u.email] || passwordsMap[cleanEmail];
     let defaultPwd = 'User@123';
     if (u.role === 'SUPER_ADMIN') defaultPwd = 'SuperAdmin@2026';
     else if (u.role === 'ADMIN') defaultPwd = 'Admin@2026';
@@ -55,10 +56,15 @@ export default async function handler(
 
     user = data.user;
 
-    // Check if the user is an admin
-    const userData = await prisma.user.findUnique({
+    // Check if the user is an admin (by ID or case-insensitive email fallback)
+    let userData = await prisma.user.findUnique({
       where: { id: user.id },
     });
+    if (!userData && user.email) {
+      userData = await prisma.user.findFirst({
+        where: { email: { equals: user.email.trim(), mode: 'insensitive' } },
+      });
+    }
 
     if (!userData || ((userData.role as any) !== 'ADMIN' && (userData.role as any) !== 'SUPER_ADMIN')) {
       return res.status(403).json({ error: 'Forbidden: Admin access required' });

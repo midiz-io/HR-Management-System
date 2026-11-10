@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@/util/supabase/api';
 import prisma from '@/lib/prisma';
-import { createAdminClient } from '@/util/supabase/admin';
+import { syncSupabaseAuthCredentials } from '@/pages/api/auth/sync-credentials';
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,10 +14,15 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Check if the user is an admin
-  const adminUser = await prisma.user.findUnique({
+  // Check if the user is an admin (by ID or case-insensitive email fallback)
+  let adminUser = await prisma.user.findUnique({
     where: { id: authUser.id },
   });
+  if (!adminUser && authUser.email) {
+    adminUser = await prisma.user.findFirst({
+      where: { email: { equals: authUser.email.trim(), mode: 'insensitive' } },
+    });
+  }
 
   if (!adminUser || (adminUser.role !== 'SUPER_ADMIN' && adminUser.role !== 'ADMIN')) {
     return res.status(403).json({ error: 'Forbidden: Admin access required' });
@@ -32,20 +37,15 @@ export default async function handler(
 
     try {
       console.log(`Attempting password reset for user: ${userId}`);
-      
-      // 1. Update Supabase Auth if credentials available
-      try {
-        const adminClient = createAdminClient();
-        const { error } = await adminClient.auth.admin.updateUserById(
-          userId,
-          { password: password }
-        );
-        if (error) {
-          console.warn('Supabase auth update warning:', error);
-        }
-      } catch (adminClientErr: any) {
-        console.warn('Supabase admin client error (proceeding with local credential update):', adminClientErr?.message);
-      }
+
+      const targetDbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true }
+      });
+      const cleanEmail = (targetDbUser?.email || '').trim().toLowerCase();
+
+      // 1. Update Supabase Auth via Admin Client + Direct SQL fallback
+      await syncSupabaseAuthCredentials(userId, cleanEmail, password);
 
       // 2. Persist in SystemSetting USER_PASSWORDS so admins can view and copy
       try {
@@ -60,12 +60,9 @@ export default async function handler(
         }
         passwordsMap[userId] = password;
 
-        const targetDbUser = await prisma.user.findUnique({
-          where: { id: userId },
-          select: { email: true }
-        });
         if (targetDbUser?.email) {
           passwordsMap[targetDbUser.email] = password;
+          passwordsMap[cleanEmail] = password;
         }
 
         await prisma.systemSetting.upsert({
