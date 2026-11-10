@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@/util/supabase/api';
 import prisma from '@/lib/prisma';
+import { syncSupabaseAuthCredentials } from '@/pages/api/auth/sync-credentials';
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,10 +15,15 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Check if the user is an admin
-  const userData = await prisma.user.findUnique({
+  // Check if the user is an admin (by ID or case-insensitive email fallback)
+  let userData = await prisma.user.findUnique({
     where: { id: user.id },
   });
+  if (!userData && user.email) {
+    userData = await prisma.user.findFirst({
+      where: { email: { equals: user.email.trim(), mode: 'insensitive' } },
+    });
+  }
 
   if (!userData || ((userData.role as any) !== 'ADMIN' && (userData.role as any) !== 'SUPER_ADMIN')) {
     return res.status(403).json({ error: 'Forbidden: Admin access required' });
@@ -144,6 +150,28 @@ export default async function handler(
         where: { id },
         data: updateData,
       });
+
+      // If role was updated (e.g. to ADMIN), ensure auth.users is confirmed and synced with displayed password if no custom password is set
+      if (role !== undefined && updatedUser.email) {
+        try {
+          const pwdSetting = await prisma.systemSetting.findUnique({
+            where: { key: 'USER_PASSWORDS' },
+          });
+          const passwordsMap: Record<string, string> = pwdSetting?.value ? JSON.parse(pwdSetting.value) : {};
+          const cleanEmail = updatedUser.email.trim().toLowerCase();
+          const existingSavedPwd = passwordsMap[id] || passwordsMap[updatedUser.email] || passwordsMap[cleanEmail];
+
+          if (!existingSavedPwd && (role === 'ADMIN' || role === 'SUPER_ADMIN' || role === 'MANAGER')) {
+            const targetPwd =
+              role === 'SUPER_ADMIN' ? 'SuperAdmin@2026' : role === 'ADMIN' ? 'Admin@2026' : 'Manager@2026';
+            await syncSupabaseAuthCredentials(id, cleanEmail, targetPwd);
+          } else if (existingSavedPwd) {
+            await syncSupabaseAuthCredentials(id, cleanEmail, existingSavedPwd);
+          }
+        } catch (rolePwdSyncErr) {
+          console.warn('Warning syncing role default password to auth.users:', rolePwdSyncErr);
+        }
+      }
 
       // Manually add the official joinDate and locationId back to the response since Prisma might ignore them if model is old
       try {

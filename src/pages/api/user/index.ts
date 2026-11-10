@@ -219,17 +219,41 @@ async function handleUserRequest(
         return res.status(200).json(userData);
       }
 
-      // If not found in Prisma, try to create the user
-      // Get email from Supabase if available
+      // If not found in Prisma by ID, try to get email from Supabase session or auth.users
       let email = '';
       try {
         const supabase = createClient(req, res);
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          email = session.user.email || '';
+        if (session?.user?.email) {
+          email = session.user.email;
         }
       } catch (error) {
         console.error('Error getting user email from Supabase session:', error);
+      }
+
+      if (!email) {
+        try {
+          const authEmailRows: any[] = await prisma.$queryRaw`SELECT email FROM auth.users WHERE id = ${userId}::uuid`;
+          if (authEmailRows && authEmailRows.length > 0 && authEmailRows[0].email) {
+            email = authEmailRows[0].email;
+          }
+        } catch {
+          // Ignore if auth.users lookup fails
+        }
+      }
+
+      if (email) {
+        const existingByEmail = await prisma.user.findFirst({
+          where: {
+            email: {
+              equals: email.trim(),
+              mode: 'insensitive',
+            },
+          },
+        });
+        if (existingByEmail) {
+          return res.status(200).json(existingByEmail);
+        }
       }
 
       const newUser = await prisma.user.create({

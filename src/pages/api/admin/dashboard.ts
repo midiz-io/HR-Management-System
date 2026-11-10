@@ -14,10 +14,24 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
-      const userData = await prisma.user.findUnique({
+      let userData = await prisma.user.findUnique({
         where: { id: userId as string },
         select: { id: true, role: true },
       });
+
+      if (!userData) {
+        try {
+          const authEmailRows: any[] = await prisma.$queryRaw`SELECT email FROM auth.users WHERE id = ${userId}::uuid`;
+          if (authEmailRows && authEmailRows.length > 0 && authEmailRows[0].email) {
+            userData = await prisma.user.findFirst({
+              where: { email: { equals: authEmailRows[0].email.trim(), mode: 'insensitive' } },
+              select: { id: true, role: true },
+            });
+          }
+        } catch {
+          // Ignore fallback error
+        }
+      }
 
       const role = userData?.role as string | undefined;
       if (!userData || (role !== 'ADMIN' && role !== 'SUPER_ADMIN' && role !== 'SECTIONAL_HEAD')) {
